@@ -1,0 +1,13 @@
+{
+	"extends": "@tsconfig/strictest/tsconfig.json",
+	"compilerOptions": {
+		"target": "es2023",
+		"lib": ["ES2023"],
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"exactOptionalPropertyTypes": false,
+		"noEmit": true,
+		"types": ["node"]
+	},
+	"include": ["bin/**/*.ts", "functions/**/*.ts", "lib/**/*.ts"]
+}

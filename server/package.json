@@ -1,0 +1,30 @@
+{
+	"name": "safebadge-server",
+	"version": "0.1.0",
+	"license": "AGPL-3.0-only",
+	"private": true,
+	"scripts": {
+		"build": "tsc",
+		"watch": "tsc -w",
+		"synth": "cdk synth",
+		"check": "npm run synth",
+		"cdk": "cdk"
+	},
+	"devDependencies": {
+		"@tsconfig/strictest": "^2.0.8",
+		"@types/aws-lambda": "^8.10.162",
+		"@types/node": "^24.10.1",
+		"aws-cdk": "2.1136.0",
+		"esbuild": "^0.28.2",
+		"tsx": "^4.23.0",
+		"typescript": "~7.0.2"
+	},
+	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.1109.0",
+		"@aws-sdk/client-ssm": "^3.1109.0",
+		"@aws-sdk/lib-dynamodb": "^3.1109.0",
+		"aws-cdk-lib": "^2.264.0",
+		"constructs": "^10.5.0",
+		"jose": "^6.2.8"
+	}
+}

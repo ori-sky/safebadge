@@ -1,0 +1,11 @@
+{
+	"extends": "@tsconfig/strictest/tsconfig.json",
+	"compilerOptions": {
+		"target": "es2023",
+		"lib": ["DOM", "DOM.Iterable", "ES2023", "ES2024.Promise"],
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"noEmit": true
+	},
+	"include": ["src/**/*.ts"]
+}

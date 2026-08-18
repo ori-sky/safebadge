@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="referrer" content="no-referrer">
+		<title>Safe Badge</title>
+		<style>
+			:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+			body { display: grid; min-height: 100vh; margin: 0; place-items: center; }
+			main { max-width: 36rem; padding: 2rem; text-align: center; }
+			.content { margin: 0 auto; text-align: justify; }
+			a.button { display: inline-block; margin-top: 1rem; padding: .75rem 1.1rem; border-radius: .5rem; background: #0a8f6a; color: white; font-weight: 700; text-decoration: none; }
+			a.button:hover { background: #087657; }
+			a.button:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Safe Badge</h1>
+			<h2>A browser extension that lets Twitch viewers know you've disabled Gen AI training on your stream.</h2>
+			<div class="content">
+				<p>
+					Recent Twitch changes enabled Gen AI training by default.
+					Viewers have no way of disabling this on streams they're
+					watching. In fact, there's no way to even know it's enabled
+					on a stream. Safe Badge is the best solution I can think
+					of.
+				</p>
+				<p>
+					Safe Badge operates on an honor system.
+				</p>
+				<p>
+					By confirming, you attest that you have disabled Gen AI training on your account.
+				</p>
+			</div>
+			<a class="button" href="/auth/twitch/start">Confirm Safe Badge</a>
+			<a class="button" href="https://chromewebstore.google.com/detail/safe-badge/cheldhjfgfnmfmoacofonaljpnjnchof">Chrome Extension</a>
+			<h1>Frequently Asked Questions</h1>
+			<div class="content">
+				<h3>Firefox / other browsers?</h3>
+				<p>
+					I'm intending to publish the extension for non-Chrome browsers
+					soon! Please be patient :c
+				</p>
+				<h3>Why does this require my email?</h3>
+				<p>
+					It doesn't. Twitch makes it look like it does, but hear me out.
+				</p>
+				<p>
+					The Twitch API requires an OAuth scope to authenticate you. The
+					narrowest scope I can choose is <code>openid</code>, which is
+					part of OpenID Connect. OpenID Connect <i>can</i> include your
+					email address, profile pic, etc.
+				</p>
+				<p>
+					However, OpenID requires these pieces of info to be requested
+					through what are called <i>claims</i>. By default, none of that
+					information is actually claimed, so it's never sent to my
+					server. The OAuth URL would need to include
+					<code>&amp;claims={jsonObject}</code> to explicitly request
+					your email address.
+				</p>
+				<p>
+					You can verify what I'm telling you by checking the official
+					Twitch API documentation on OpenID <a
+					href="https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#requesting-claims">here</a>.
+				</p>
+				<h3>I still don't trust this</h3>
+				<p>
+					That's okay! I've designed the browser extension to look for a
+					bunch of common Twitch tags or stream title hashtags. As a
+					streamer, if you just put one of these in your tags or title,
+					the extension should pick up on that and display the badge for
+					you. Some examples:
+				</p>
+				<ul>
+					<li>AIOptedOut</li>
+					<li>NoGenAI</li>
+					<li>AIOptOut</li>
+					<li>NoAITraining</li>
+					<li>NoAI</li>
+					<li>GenAIOff</li>
+					<li>GenAIOptedOut</li>
+					<li>GenAIIsOff</li>
+					<li>GenAIOptOut</li>
+					<li>GenAITrainingOff</li>
+					<li>NoGenerativeAITraining</li>
+					<li>NoGenerativeAI</li>
+				</ul>
+			</div>
+		</main>
+	</body>
+</html>

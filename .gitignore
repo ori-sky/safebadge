@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# build
+dist/
+release/
+safari/
+node_modules/
+server/cdk-outputs.json
+
+# vim
+.*.swp
+.*.swo

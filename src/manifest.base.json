@@ -1,0 +1,20 @@
+{
+	"manifest_version": 3,
+	"name": "Safe Badge",
+	"version": "0.2.0",
+	"description": "A browser extension that lets Twitch viewers know you've disabled Gen AI training on your stream.",
+	"content_scripts": [
+		{
+			"matches": [
+				"https://www.twitch.tv/*",
+				"https://dashboard.twitch.tv/*"
+			],
+			"js": [
+				"content.js"
+			],
+			"css": [
+				"content.css"
+			]
+		}
+	]
+}
