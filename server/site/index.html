@@ -6,9 +6,10 @@
 		<meta name="referrer" content="no-referrer">
 		<title>Safe Badge</title>
 		<style>
-			:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+			:root { color-scheme: dark; font-family: system-ui, sans-serif; }
 			body { display: grid; min-height: 100vh; margin: 0; place-items: center; }
 			main { max-width: 36rem; padding: 2rem; text-align: center; }
+			h3 { color: #ddffbb; }
 			.content { margin: 0 auto; text-align: justify; }
 			a.button { display: inline-block; margin-top: 1rem; padding: .75rem 1.1rem; border-radius: .5rem; background: #0a8f6a; color: white; font-weight: 700; text-decoration: none; }
 			a.button:hover { background: #087657; }
@@ -35,44 +36,59 @@
 				</p>
 			</div>
 			<a class="button" href="/auth/twitch/start">Confirm Safe Badge</a>
+			<br />
 			<a class="button" href="https://chromewebstore.google.com/detail/safe-badge/cheldhjfgfnmfmoacofonaljpnjnchof">Chrome Extension</a>
 			<h1>Frequently Asked Questions</h1>
 			<div class="content">
 				<h3>Firefox / other browsers?</h3>
 				<p>
-					I'm intending to publish the extension for non-Chrome browsers
-					soon! Please be patient :c
+					I'm intending to publish the extension for non-Chrome
+					browsers soon! Please be patient :c
 				</p>
 				<h3>Why does this require my email?</h3>
 				<p>
-					It doesn't. Twitch makes it look like it does, but hear me out.
+					It actually doesn't. Twitch makes it seem like it does, but
+					hear me out.
 				</p>
 				<p>
-					The Twitch API requires an OAuth scope to authenticate you. The
-					narrowest scope I can choose is <code>openid</code>, which is
-					part of OpenID Connect. OpenID Connect <i>can</i> include your
-					email address, profile pic, etc.
+					The Twitch API requires an OAuth scope to authenticate you.
+					The narrowest scope I can choose is <code>openid</code>,
+					which is part of OpenID Connect. OpenID Connect <i>can</i>
+					include your email address, profile pic, etc.
 				</p>
 				<p>
-					However, OpenID requires these pieces of info to be requested
-					through what are called <i>claims</i>. By default, none of that
-					information is actually claimed, so it's never sent to my
-					server. The OAuth URL would need to include
-					<code>&amp;claims={jsonObject}</code> to explicitly request
-					your email address.
+					However, OpenID requires these pieces of info to be
+					requested through what are called <i>claims</i>. By
+					default, none of that information is actually claimed, so
+					it's never sent to my server. The OAuth URL would need to
+					include <code>&amp;claims={jsonObject}</code> to explicitly
+					request your email address.
 				</p>
 				<p>
-					You can verify what I'm telling you by checking the official
-					Twitch API documentation on OpenID <a
+					You can verify what I'm telling you by checking the
+					official Twitch API documentation on OpenID <a
 					href="https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#requesting-claims">here</a>.
+				</p>
+				<h3>Can I see the source code?</h3>
+				<p>
+					Yeah! I've finally published it <a
+					href="https://github.com/ori-sky/safebadge">here on
+					GitHub</a>.
+				</p>
+				<p>
+					Yes, I know GitHub is questionable in terms of AI stuff,
+					but this is where <i>all</i> of my projects are hosted. I
+					might migrate away from GitHub eventually but it's
+					currently more effort than I have time for, due to real
+					life and adulting unfortunately being a thing.
 				</p>
 				<h3>I still don't trust this</h3>
 				<p>
-					That's okay! I've designed the browser extension to look for a
-					bunch of common Twitch tags or stream title hashtags. As a
-					streamer, if you just put one of these in your tags or title,
-					the extension should pick up on that and display the badge for
-					you. Some examples:
+					That's okay! I've designed the browser extension to look
+					for a bunch of common Twitch tags or stream title hashtags.
+					As a streamer, if you just put one of these in your tags or
+					title, the extension should pick up on that and display the
+					badge for anyone who does use it. Some examples:
 				</p>
 				<ul>
 					<li>AIOptedOut</li>
