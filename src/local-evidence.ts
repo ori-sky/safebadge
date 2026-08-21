@@ -28,7 +28,7 @@ export function isSafetyTag(value: string): boolean {
 	return SAFETY_TAGS.has(value.trim().toLowerCase());
 }
 
-function titleHasLocalSafetyHashtag(title: string): boolean {
+export function titleHasLocalSafetyHashtag(title: string): boolean {
 	const hashtagPattern =
 		/(^|[^\p{L}\p{N}_])#([a-z0-9_]+)(?![\p{L}\p{N}_])/giu;
 

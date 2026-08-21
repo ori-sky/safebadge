@@ -1,9 +1,9 @@
 import { Account, AccountSet } from './account';
-import { isSafetyTag } from './local-evidence';
+import { isSafetyTag, titleHasLocalSafetyHashtag } from './local-evidence';
 
 const API_URL = 'https://safebadge.ori.mx/v1/status:batch';
 const TWITCH_GQL_URL = 'https://gql.twitch.tv/gql';
-const TWITCH_TAG_QUERY = 'query UserTags($login: String!) { user(login: $login) { login freeformTags { name } } }';
+const TWITCH_TAG_QUERY = 'query UserTags($login: String!) { user(login: $login) { login freeformTags { name } stream { title } } }';
 const TWITCH_CLIENT_ID_PATTERN = /\bclientId\s*[:=]\s*['"]([a-z0-9]{20,64})['"]/i;
 const MAX_BATCH_SIZE = 100;
 const REQUEST_TIMEOUT_MILLISECONDS = 8_000;
@@ -23,6 +23,9 @@ interface TwitchTagResponse {
 		user?: {
 			login?: unknown;
 			freeformTags?: readonly ({ name?: unknown } | null)[] | null;
+			stream?: {
+				title?: unknown;
+			} | null;
 		} | null;
 	};
 }
@@ -230,13 +233,18 @@ export class SafetyService {
 			for(const [index, account] of accounts.entries()) {
 				const user = results[index]?.data?.user;
 				const tags = user?.freeformTags;
+				const title = user?.stream?.title;
+
+				const hasSafetyTag = Array.isArray(tags) && tags.some(tag =>
+					typeof tag?.name === 'string' && isSafetyTag(tag.name)
+				);
+				const hasSafetyTitle =
+					typeof title === 'string' &&
+					titleHasLocalSafetyHashtag(title);
 
 				if(
 					user?.login === account.login &&
-					Array.isArray(tags) &&
-					tags.some(tag =>
-						typeof tag?.name === 'string' && isSafetyTag(tag.name)
-					)
+					(hasSafetyTag || hasSafetyTitle)
 				) {
 					taggedAccounts.push(account);
 				}
