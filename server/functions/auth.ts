@@ -17,17 +17,11 @@ import {
 	randomBytes,
 	timingSafeEqual
 } from 'node:crypto';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 const TWITCH_AUTHORIZE_URL = 'https://id.twitch.tv/oauth2/authorize';
 const TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token';
 const TWITCH_VALIDATE_URL = 'https://id.twitch.tv/oauth2/validate';
 const TWITCH_REVOKE_URL = 'https://id.twitch.tv/oauth2/revoke';
-const TWITCH_ISSUER = 'https://id.twitch.tv/oauth2';
-const TWITCH_JWKS = createRemoteJWKSet(
-	new URL('https://id.twitch.tv/oauth2/keys'),
-	{ timeoutDuration: 5_000 }
-);
 
 const OAUTH_COOKIE = '__Host-safetwitch_oauth';
 const OAUTH_LIFETIME_SECONDS = 10 * 60;
@@ -51,7 +45,6 @@ interface TwitchCredentials {
 
 interface TokenResponse {
 	access_token: string;
-	id_token: string;
 }
 
 interface ValidationResponse {
@@ -90,7 +83,6 @@ export async function handler(
 async function startAuthorization(): Promise<APIGatewayProxyStructuredResultV2> {
 	const credentials = await getTwitchCredentials();
 	const state = randomBytes(32).toString('base64url');
-	const nonce = randomBytes(32).toString('base64url');
 	const now = Math.floor(Date.now() / 1_000);
 
 	await documentClient.send(new PutCommand({
@@ -98,7 +90,6 @@ async function startAuthorization(): Promise<APIGatewayProxyStructuredResultV2> 
 		Item: {
 			pk: oauthKey(state),
 			kind: 'OAUTH_ATTEMPT',
-			nonce,
 			ttl: now + OAUTH_LIFETIME_SECONDS
 		},
 		ConditionExpression: 'attribute_not_exists(pk)'
@@ -109,9 +100,7 @@ async function startAuthorization(): Promise<APIGatewayProxyStructuredResultV2> 
 		response_type: 'code',
 		client_id: credentials.clientId,
 		redirect_uri: callbackUrl,
-		scope: 'openid',
 		state,
-		nonce
 	}).toString();
 
 	return {
@@ -141,7 +130,7 @@ async function finishAuthorization(
 		throw new Error('Invalid OAuth state');
 	}
 
-	const nonce = await consumeOAuthAttempt(state);
+	await consumeOAuthAttempt(state);
 
 	const oauthError = singleQueryValue(query, 'error');
 	if(oauthError) {
@@ -155,18 +144,13 @@ async function finishAuthorization(
 
 	const credentials = await getTwitchCredentials();
 	const tokens = await exchangeAuthorizationCode(code, credentials);
-	const subject = await verifyIdToken(
-		tokens.id_token,
-		credentials.clientId,
-		nonce
-	);
 	const identity = await validateAccessToken(tokens.access_token);
 
 	if(
 		identity.client_id !== credentials.clientId
-		|| identity.user_id !== subject
 		|| identity.expires_in <= 0
-		|| !identity.scopes.includes('openid')
+		|| identity.scopes.length !== 0
+		|| !TWITCH_USER_ID.test(identity.user_id)
 		|| !TWITCH_LOGIN.test(identity.login)
 	) {
 		throw new Error('Twitch identity validation failed');
@@ -178,22 +162,15 @@ async function finishAuthorization(
 	return redirect(`${siteUrl}/success.html`);
 }
 
-async function consumeOAuthAttempt(state: string): Promise<string> {
+async function consumeOAuthAttempt(state: string): Promise<void> {
 	const now = Math.floor(Date.now() / 1_000);
-	const response = await documentClient.send(new DeleteCommand({
+	await documentClient.send(new DeleteCommand({
 		TableName: tableName,
 		Key: { pk: oauthKey(state) },
 		ConditionExpression: 'attribute_exists(pk) AND #ttl >= :now',
 		ExpressionAttributeNames: { '#ttl': 'ttl' },
-		ExpressionAttributeValues: { ':now': now },
-		ReturnValues: 'ALL_OLD'
+		ExpressionAttributeValues: { ':now': now }
 	}));
-
-	const nonce = response.Attributes?.['nonce'];
-	if(typeof nonce !== 'string' || !BASE64URL_32_BYTES.test(nonce)) {
-		throw new Error('OAuth attempt is invalid or expired');
-	}
-	return nonce;
 }
 
 async function exchangeAuthorizationCode(
@@ -220,43 +197,13 @@ async function exchangeAuthorizationCode(
 	const body = await response.json() as Partial<TokenResponse>;
 	if(
 		typeof body.access_token !== 'string'
-		|| typeof body.id_token !== 'string'
 		|| body.access_token.length > 4_096
-		|| body.id_token.length > 16_384
 	) {
 		throw new Error('Twitch returned an invalid token response');
 	}
 
 	return body as TokenResponse;
 }
-
-async function verifyIdToken(
-	idToken: string,
-	clientId: string,
-	nonce: string
-): Promise<string> {
-	const { payload } = await jwtVerify(idToken, TWITCH_JWKS, {
-		algorithms: ['RS256'],
-		audience: clientId,
-		issuer: TWITCH_ISSUER,
-		requiredClaims: ['exp', 'iat', 'sub', 'azp', 'nonce'],
-		maxTokenAge: '10 minutes',
-		clockTolerance: 5
-	});
-
-	if(
-		payload['azp'] !== clientId
-		|| typeof payload['nonce'] !== 'string'
-		|| !constantTimeEqual(payload['nonce'], nonce)
-		|| typeof payload.sub !== 'string'
-		|| !TWITCH_USER_ID.test(payload.sub)
-	) {
-		throw new Error('Twitch ID token validation failed');
-	}
-
-	return payload.sub;
-}
-
 async function validateAccessToken(accessToken: string): Promise<ValidationResponse> {
 	const response = await fetch(TWITCH_VALIDATE_URL, {
 		headers: { authorization: `OAuth ${accessToken}` },

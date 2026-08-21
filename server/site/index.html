@@ -19,24 +19,51 @@
 	<body>
 		<main>
 			<h1>Safe Badge</h1>
-			<h2>A browser extension that lets Twitch viewers know you've disabled Gen AI training on your stream.</h2>
+			<h2>
+				A browser extension that lets Twitch viewers know you've
+				disabled Gen AI training on your stream.
+			</h2>
 			<div class="content">
 				<p>
-					Recent Twitch changes enabled Gen AI training by default.
-					Viewers have no way of disabling this on streams they're
-					watching. In fact, there's no way to even know it's enabled
-					on a stream. Safe Badge is the best solution I can think
-					of.
+					Twitch has enabled Gen AI training on all accounts by
+					default. Viewers have no way of disabling this on streams
+					they're watching, so if a streamer has not turned this off,
+					all chat messages may be used for AI training.
 				</p>
 				<p>
-					Safe Badge operates on an honor system.
-				</p>
-				<p>
-					By confirming, you attest that you have disabled Gen AI training on your account.
+					Safe Badge does two things. For streamers, it gives you a
+					way of acknowledging that you've disabled Gen AI training.
+					By clicking this button and completing authentication, you
+					acknowledge that you have done so.
 				</p>
 			</div>
 			<a class="button" href="/auth/twitch/start">Confirm Safe Badge</a>
-			<br />
+			<div class="content">
+				<p>
+					For viewers, the browser extension shows a badge beside
+					every streamer who claims to have opted out of Gen AI
+					training. This is done in two ways:
+				</p>
+				<ol>
+					<li>
+						A lookup is sent to the Safe Badge database, which
+						returns true if they have authenticated using the
+						button above.
+					</li>
+					<li>
+						A lookup is sent to Twitch to retrieve the streamer's
+						current tags. If any of them match one in the big list
+						of recognized tags (see the bottom of the FAQ), then
+						that is treated in the same manner.
+					</li>
+				</ol>
+				<p>
+					Please keep in mind that Safe Badge operates on an honor
+					system. Twitch offers no way of verifying this, so a
+					streamer <i>can</i> lie about having opted out. It's not
+					ideal, but this is the best we as a community can do.
+				</p>
+			</div>
 			<a class="button" href="https://chromewebstore.google.com/detail/safe-badge/cheldhjfgfnmfmoacofonaljpnjnchof">Chrome Extension</a>
 			<h1>Frequently Asked Questions</h1>
 			<div class="content">
@@ -45,29 +72,43 @@
 					I'm intending to publish the extension for non-Chrome
 					browsers soon! Please be patient :c
 				</p>
-				<h3>Why does this require my email?</h3>
+				<h3>What browser permissions does the extension need?</h3>
 				<p>
-					It actually doesn't. Twitch makes it seem like it does, but
-					hear me out.
+					Since the extension needs to scan for streamer names and
+					modify the page to add the badges, it requires what's
+					called <i>host permissions</i> on twitch.tv and
+					dashboard.twitch.tv. This is required to do this sort of
+					thing -- see the Twitch pronouns extension for another
+					example of this.
+				</p>
+				<h3>What permissions does this need to authenticate me?</h3>
+				<p>
+					None! Safe Badge requires no OAuth scopes.
 				</p>
 				<p>
-					The Twitch API requires an OAuth scope to authenticate you.
-					The narrowest scope I can choose is <code>openid</code>,
-					which is part of OpenID Connect. OpenID Connect <i>can</i>
-					include your email address, profile pic, etc.
+					It uses Twitch OAuth only to confirm your Twitch user ID
+					and login. These are stored so that the browser extension
+					can verify that the badge should be added beside your name.
+					The temporary access token is revoked immediately after
+					confirmation.
 				</p>
 				<p>
-					However, OpenID requires these pieces of info to be
-					requested through what are called <i>claims</i>. By
-					default, none of that information is actually claimed, so
-					it's never sent to my server. The OAuth URL would need to
-					include <code>&amp;claims={jsonObject}</code> to explicitly
-					request your email address.
+					As a more technical answer, it <i>used</i> to require the
+					<code>openid</code> OAuth scope. However, there is a
+					longstanding bug in Twitch's OAuth display, where it would
+					imply that I'm requesting your email address, profile
+					picture, and a bunch of other stuff. None of this stuff was
+					actually being requested, as the OAuth URL would need to
+					include a <code>claims</code> parameter in order to
+					explicitly request these (which it did not).
 				</p>
 				<p>
-					You can verify what I'm telling you by checking the
-					official Twitch API documentation on OpenID <a
-					href="https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#requesting-claims">here</a>.
+					As a consequence, however, some people raised concerns
+					about the apparent broad permissions being requested. So,
+					I'm relying on undocumented Twitch OAuth behaviour that
+					lets me omit the <code>scope</code> parameter entirely.
+					Please be aware that this could stop working in the future,
+					as it is not a documented feature of the API.
 				</p>
 				<h3>Can I see the source code?</h3>
 				<p>
