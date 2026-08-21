@@ -50,7 +50,7 @@ interface TokenResponse {
 interface ValidationResponse {
 	client_id: string;
 	login: string;
-	scopes: string[];
+	scopes: string[] | null;
 	user_id: string;
 	expires_in: number;
 }
@@ -149,7 +149,7 @@ async function finishAuthorization(
 	if(
 		identity.client_id !== credentials.clientId
 		|| identity.expires_in <= 0
-		|| identity.scopes.length !== 0
+		|| (identity.scopes !== null && identity.scopes.length === 0)
 		|| !TWITCH_USER_ID.test(identity.user_id)
 		|| !TWITCH_LOGIN.test(identity.login)
 	) {
@@ -218,8 +218,13 @@ async function validateAccessToken(accessToken: string): Promise<ValidationRespo
 	if(
 		typeof body.client_id !== 'string'
 		|| typeof body.login !== 'string'
-		|| !Array.isArray(body.scopes)
-		|| !body.scopes.every(scope => typeof scope === 'string')
+		|| !(
+			body.scopes === null
+			|| (
+				Array.isArray(body.scopes)
+				&& body.scopes.every(scope => typeof scope === 'string')
+			)
+		)
 		|| typeof body.user_id !== 'string'
 		|| typeof body.expires_in !== 'number'
 	) {
