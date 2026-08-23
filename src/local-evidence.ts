@@ -21,7 +21,8 @@ const SAFETY_TAGS = new Set([
 	'nogenerativeai',
 	'nogenerativeaitraining',
 	'nogenaitraining',
-	'optedoutofgenaitraining'
+	'optedoutofgenaitraining',
+	'optedoutofgenai'
 ]);
 
 export function isSafetyTag(value: string): boolean {
