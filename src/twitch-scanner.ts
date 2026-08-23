@@ -3,18 +3,15 @@ import { BadgeManager, BadgeTarget } from './badge';
 import { Group } from './group';
 import { TwitchStreamScanner } from './twitch-stream-scanner';
 
-const SHARED_CHAT_FLYOUT_SELECTOR =
-	'.side-nav-guest-star-tooltip__body';
+const SHARED_CHAT_FLYOUT_SELECTOR = '.side-nav-guest-star-tooltip__body';
 const LIVE_INDICATOR_SELECTOR = '.tw-channel-status-indicator';
 const CHAT_USER_CARD_SELECTOR = '#VIEWER_CARD_ID';
-const CHAT_USER_CARD_NAME_SELECTOR =
-	'[data-a-target=\'viewer-card-display-name\']';
+const CHAT_USER_CARD_NAME_SELECTOR = '[data-a-target=\'viewer-card-display-name\']';
 const SEARCH_RESULT_NAME_SELECTOR = [
 	'[data-test-selector=\'search-result-live-channel__name\']',
 	'[data-test-selector=\'search-result-offline-channel__name\']'
 ].join(',');
-const SEARCH_TRAY_ITEM_SELECTOR =
-	'[data-a-target=\'nav-search-tray\'] [data-a-target=\'nav-search-item\']';
+const SEARCH_TRAY_ITEM_SELECTOR = '[data-a-target=\'nav-search-tray\'] [data-a-target=\'nav-search-item\']';
 const SEARCH_TRAY_LINK_SELECTOR = 'a[data-tray-item=\'true\'][href]';
 
 export const TWITCH_IDENTITY_ATTRIBUTES = [
