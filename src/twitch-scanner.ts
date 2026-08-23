@@ -3,7 +3,10 @@ import { BadgeManager, BadgeTarget } from './badge';
 import { Group } from './group';
 import { TwitchStreamScanner } from './twitch-stream-scanner';
 
-const SHARED_CHAT_FLYOUT_SELECTOR = '.side-nav-guest-star-tooltip__body';
+const SHARED_CHAT_FLYOUT_SELECTOR = [
+	'.side-nav-guest-star-tooltip__body',
+	'[role=\'dialog\'] .guest-list'
+].join(',');
 const LIVE_INDICATOR_SELECTOR = '.tw-channel-status-indicator';
 const CHAT_USER_CARD_SELECTOR = '#VIEWER_CARD_ID';
 const CHAT_USER_CARD_NAME_SELECTOR = '[data-a-target=\'viewer-card-display-name\']';
@@ -74,8 +77,7 @@ export class TwitchScanner {
 					const liveIndicatorCount = owner.querySelectorAll(
 						LIVE_INDICATOR_SELECTOR
 					).length;
-					const images = owner.querySelectorAll<HTMLImageElement>('img[alt]');
-					const accounts = this.accountsFromImages(images);
+					const accounts = this.accountsFromOwner(owner);
 					const account = [...accounts][0];
 
 					if(
@@ -160,10 +162,18 @@ export class TwitchScanner {
 		void this.badges.update(Group.from(account), target);
 	}
 
-	private accountsFromImages(images: Iterable<HTMLImageElement>): AccountSet {
-		return new AccountSet(
-			Array.from(images, image => Account.from(image.alt))
-				.filter(account => account !== null)
+	private accountsFromOwner(owner: HTMLElement): AccountSet {
+		const accounts = Array.from(
+			owner.querySelectorAll<HTMLImageElement>('img[alt]'),
+			img => Account.from(img.alt)
 		);
+		const linkAccount = owner instanceof HTMLAnchorElement
+			? Account.fromProfileUrl(owner.href)
+			: null;
+		if(linkAccount) {
+			accounts.push(linkAccount);
+		}
+
+		return new AccountSet(accounts.filter(account => account !== null));
 	}
 }

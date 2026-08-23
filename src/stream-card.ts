@@ -6,13 +6,25 @@ export function participantCountFromElements(
 	elements: Iterable<Element>
 ): number | null {
 	const text = Array.from(elements, element => element.textContent?.trim() ?? '')
-		.find(value => /^\+\d+$/.test(value));
+		.find(value => /^\+\s*\d+$/.test(value));
 
 	if(!text) {
 		return null;
 	}
 
 	const total = Number.parseInt(text.slice(1), 10) + 1;
+	return Number.isSafeInteger(total) ? total : null;
+}
+
+function participantCountFromAriaLabel(
+	ariaLabel: string,
+): number | null {
+	const guests = /\band\s+(\d+)\s+guests?\s+streaming\b/i.exec(ariaLabel)?.[1];
+	if(!guests) {
+		return null;
+	}
+
+	const total = Number.parseInt(guests, 10) + 1;
 	return Number.isSafeInteger(total) ? total : null;
 }
 
@@ -42,9 +54,14 @@ export class StreamCard {
 			return null;
 		}
 
+		const ariaLabel = link.getAttribute('aria-label');
+		const ariaLabelCount = ariaLabel === null
+			? null
+			: participantCountFromAriaLabel(ariaLabel);
+
 		const expectedSize = participantCountFromElements(
 			link.querySelectorAll('p')
-		) ?? 1;
+		) ?? ariaLabelCount ?? 1;
 		const observed = expectedSize === 1 ? [] : StreamCard.participants(link);
 
 		return new StreamCard(primary, observed, expectedSize, target);
@@ -95,7 +112,13 @@ export class StreamCard {
 	}
 
 	private static participants(root: HTMLAnchorElement): Account[] {
-		return Array.from(root.querySelectorAll<HTMLImageElement>('img[alt]'))
+		const participantRoot = root.closest('article')?.querySelector<HTMLElement>(
+			'[data-test-selector=\'preview-card-avatar\']'
+		) ?? root;
+
+		return Array.from(
+			participantRoot.querySelectorAll<HTMLImageElement>('img[alt]')
+		)
 			.flatMap(image => image.alt.split(/\s+and\s+/i))
 			.map(name => Account.from(name))
 			.filter(account => account !== null);
