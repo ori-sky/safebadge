@@ -3,20 +3,16 @@ import { BadgeManager, BadgeTarget } from './badge';
 import { Group } from './group';
 import { participantCountFromElements, StreamCard } from './stream-card';
 
-const COLLAPSED_SIDEBAR_SELECTOR =
-	'[data-a-target=\'side-nav-bar-collapsed\']';
+const COLLAPSED_SIDEBAR_SELECTOR = '[data-a-target=\'side-nav-bar-collapsed\']';
 const SIDEBAR_CARD_SELECTOR = [
 	'a[data-test-selector=\'followed-channel\'][href]',
 	'a[data-test-selector=\'recommended-channel\'][href]'
 ].join(',');
-const SIDEBAR_METADATA_SELECTOR =
-	'[data-a-target=\'side-nav-card-metadata\']';
-const SIDEBAR_LIVE_STATUS_SELECTOR =
-	'[data-a-target=\'side-nav-live-status\']';
+const SIDEBAR_METADATA_SELECTOR = '[data-a-target=\'side-nav-card-metadata\']';
+const SIDEBAR_LIVE_STATUS_SELECTOR = '[data-a-target=\'side-nav-live-status\']';
 const SIDEBAR_NAME_SELECTOR = '[data-a-target=\'side-nav-title\']';
 const LIVE_INDICATOR_SELECTOR = '.tw-channel-status-indicator';
-const PREVIEW_CARD_SELECTOR =
-	'a[data-a-target=\'preview-card-channel-link\']';
+const PREVIEW_CARD_SELECTOR = 'a[data-a-target=\'preview-card-channel-link\']';
 const CHANNEL_HEADER_SELECTOR = 'main h1';
 
 export class TwitchStreamScanner {
