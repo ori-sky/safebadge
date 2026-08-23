@@ -8,15 +8,16 @@ const SIDEBAR_CARD_SELECTOR = [
 	'a[data-test-selector=\'followed-channel\'][href]',
 	'a[data-test-selector=\'recommended-channel\'][href]'
 ].join(',');
-const SIDEBAR_METADATA_SELECTOR     = '[data-a-target=\'side-nav-card-metadata\']';
-const SIDEBAR_LIVE_STATUS_SELECTOR  = '[data-a-target=\'side-nav-live-status\']';
-const SIDEBAR_NAME_SELECTOR         = '[data-a-target=\'side-nav-title\']';
-const LIVE_INDICATOR_SELECTOR       = '.tw-channel-status-indicator';
-const PREVIEW_CARD_SELECTOR         = 'a[data-a-target=\'preview-card-channel-link\']';
-const PREVIEW_CARD_CHANNEL_SELECTOR = 'p[data-a-target=\'preview-card-channel-link\']';
-const CHANNEL_HEADER_SELECTOR       = 'main h1';
-const FEATURED_ITEM_SELECTOR        = '[data-a-target=\'front-page-carousel\'] [data-a-target=\'featured-item\']';
-const CAROUSEL_NAME_SELECTOR        = '[data-a-target=\'carousel-display-name\']';
+const SIDEBAR_METADATA_SELECTOR           = '[data-a-target=\'side-nav-card-metadata\']';
+const SIDEBAR_LIVE_STATUS_SELECTOR        = '[data-a-target=\'side-nav-live-status\']';
+const SIDEBAR_NAME_SELECTOR               = '[data-a-target=\'side-nav-title\']';
+const LIVE_INDICATOR_SELECTOR             = '.tw-channel-status-indicator';
+const PREVIEW_CARD_SELECTOR               = 'a[data-a-target=\'preview-card-channel-link\']';
+const PREVIEW_CARD_CHANNEL_SELECTOR       = 'p[data-a-target=\'preview-card-channel-link\']';
+const CHANNEL_HEADER_PARTICIPANT_SELECTOR = 'button[aria-haspopup=\'dialog\']';
+const CHANNEL_HEADER_SELECTOR             = 'main h1';
+const FEATURED_ITEM_SELECTOR              = '[data-a-target=\'front-page-carousel\'] [data-a-target=\'featured-item\']';
+const CAROUSEL_NAME_SELECTOR              = '[data-a-target=\'carousel-display-name\']';
 
 export class TwitchStreamScanner {
 	constructor(private readonly badges: BadgeManager) {}
@@ -90,14 +91,41 @@ export class TwitchStreamScanner {
 				? Account.fromProfileUrl(link.href)
 				: null;
 
-			if(headerAccount?.login !== currentAccount.login) {
+			if(!link || headerAccount?.login !== currentAccount.login) {
 				this.badges.clear(header);
 				continue;
 			}
 
+			this.scanChannelHeaderParticipants(link);
+
 			void this.badges.update(
 				this.groupForHeader(header, currentAccount, sidebarGroups),
 				BadgeTarget.full(header)
+			);
+		}
+	}
+
+	private scanChannelHeaderParticipants(headerLink: HTMLAnchorElement): void {
+		const row = headerLink.parentElement;
+		if(!row) {
+			return;
+		}
+
+		for(const button of row.querySelectorAll<HTMLButtonElement>(CHANNEL_HEADER_PARTICIPANT_SELECTOR)) {
+			const mount = button.parentElement;
+			if(!mount) {
+				continue;
+			}
+
+			const account = Account.from(button.textContent ?? '');
+			if(!account) {
+				this.badges.clear(mount);
+				continue;
+			}
+
+			void this.badges.update(
+				Group.from(account),
+				BadgeTarget.compact(mount)
 			);
 		}
 	}
