@@ -15,6 +15,8 @@ const LIVE_INDICATOR_SELECTOR       = '.tw-channel-status-indicator';
 const PREVIEW_CARD_SELECTOR         = 'a[data-a-target=\'preview-card-channel-link\']';
 const PREVIEW_CARD_CHANNEL_SELECTOR = 'p[data-a-target=\'preview-card-channel-link\']';
 const CHANNEL_HEADER_SELECTOR       = 'main h1';
+const FEATURED_ITEM_SELECTOR        = '[data-a-target=\'front-page-carousel\'] [data-a-target=\'featured-item\']';
+const CAROUSEL_NAME_SELECTOR        = '[data-a-target=\'carousel-display-name\']';
 
 export class TwitchStreamScanner {
 	constructor(private readonly badges: BadgeManager) {}
@@ -22,6 +24,7 @@ export class TwitchStreamScanner {
 	scan(): void {
 		const sidebarGroups = this.scanSidebar();
 		this.scanPreviews();
+		this.scanCarousel();
 		this.scanChannelHeader(sidebarGroups);
 	}
 
@@ -42,6 +45,30 @@ export class TwitchStreamScanner {
 				return mount ? BadgeTarget.compact(mount, link) : null;
 			}
 		);
+	}
+
+	private scanCarousel(): void {
+		for(const item of document.querySelectorAll<HTMLElement>(FEATURED_ITEM_SELECTOR)) {
+			const name = item.querySelector<HTMLElement>(CAROUSEL_NAME_SELECTOR);
+			const link = name?.closest<HTMLAnchorElement>('a[href]') ?? null;
+
+			const linkAccount = link && item.contains(link)
+				? Account.fromProfileUrl(link.href)
+				: null;
+			const nameAccount = name
+				? Account.from(name.textContent ?? '')
+				: null;
+
+			if(!link || !linkAccount || linkAccount.login !== nameAccount?.login) {
+				this.badges.clear(item);
+				continue;
+			}
+
+			void this.badges.update(
+				Group.from(linkAccount),
+				BadgeTarget.compact(link, item)
+			);
+		}
 	}
 
 	private scanChannelHeader(sidebarGroups: ReadonlySet<Group>): void {
