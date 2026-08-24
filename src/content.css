@@ -88,8 +88,11 @@
 	width: 74px !important;
 }
 
-[data-a-target='side-nav-bar-collapsed'] a[data-test-selector='followed-channel'],
-[data-a-target='side-nav-bar-collapsed'] a[data-test-selector='recommended-channel'] {
+[data-a-target='side-nav-bar-collapsed'] .side-bar-contents {
+	width: 50px !important;
+}
+
+[data-a-target='side-nav-bar-collapsed'] a[aria-haspopup='dialog'][href] {
 	justify-content: flex-start !important;
 }
 
