@@ -1,6 +1,6 @@
 {
 	"name": "safebadge-webextension",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"license": "AGPL-3.0-only",
 	"private": true,
 	"description": "A browser extension that lets Twitch viewers know you've disabled Gen AI training on your stream.",
